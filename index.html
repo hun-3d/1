@@ -1,0 +1,152 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<meta charset="UTF-8" /> 
+     <title>HUN</title>
+     <link rel="icon" type="./assets/favicon.png" href="./assets/favicon.png"/>
+     <style>
+     </style>
+</head>
+<body>
+<canvas id="myCanvas">
+    <!--El elemento HTML canvas se puede utilizar para dibujar gráficos a través de 
+        secuencias de comandos (por lo general JavaScript ).-->
+</canvas>
+<script type="importmap"> 
+    {
+        "imports":{
+            "three": "./js/three.module.js",
+            "three/OrbitControls": "./js/OrbitControls.js" 
+        }
+}
+</script>
+<script type="module"> 
+    //👉🏽 Mandar llamar a la librería
+    
+    /*import * as THREE from 'three'; 
+    import {OrbitControls} from 'three/OrbitControls';
+    console.log(OrbitControls);*/
+
+    // Import  THREE.js 
+    import * as THREE from "https://cdn.skypack.dev/three@0.129.0/build/three.module.js";
+    import { OrbitControls } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/controls/OrbitControls.js";
+    console.log(OrbitControls);
+    //LIBRERIA FBX
+    import { FBXLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/FBXLoader.js";
+    // LIBRERIA OBJETO
+    import { OBJLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/OBJLoader.js";
+    // LIBRERIA TEXTURA
+    import { MTLLoader } from "https://cdn.skypack.dev/three@0.129.0/examples/jsm/loaders/MTLLoader.js";
+
+
+    //👉🏽 Renderer - Realiza una conexión entre el código y el canvas
+    var renderer = new THREE.WebGLRenderer({canvas: document.getElementById('myCanvas'),antialias: true});
+    renderer.setPixelRatio(window.decivePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setClearColor(0x606060);
+
+    //🎬 Creando nueva escena 
+    var scene = new THREE.Scene();
+
+    //🎥 Agregar una cámara de perspectiva
+    var camera = new THREE.PerspectiveCamera(5, window.innerWidth / window.innerHeight, 0.1, 5000);
+    scene.add(camera);
+
+    // Evento para redimensionar el canvas
+
+    // Sizes: Objeto donde se toman los tamaños interiores 'inner' de la ventana.
+    const sizes = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    };
+
+    // Tomando el 'canvas' mediante el id 'myCanvas' del HTML para cambiar sus dimensiones
+    const canvas = document.getElementById('myCanvas');
+
+    // Evento que se ejecutará al redimensionar 'resize' nuestra ventana
+    window.addEventListener('resize', () => {
+
+    // Actualizando los valores del objeto 'sizes' con las medidas internas de la ventana
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+
+    // Actualización de los valores en la cámara como la relación-aspecto y la matriz de proyección.
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+
+    // Aplicando al render el nuevo tamaño del 'viewport'
+    renderer.setSize(sizes.width, sizes.height);
+    });
+
+    //👉🏽Settings de la cámara
+    camera.position.set(0, 10, 100);
+    
+    //👉🏽Añadiendo los OrbitControls
+    var controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+ 
+    controls.maxPolarAngle = Math.PI / 2.1; // Limitar la rotación vertical
+    controls.minPolarAngle = 0; // Limitar la rotación vertical
+
+    //✏️GridHelper
+    const gridHelper = new THREE.GridHelper(50,10);
+    scene.add (gridHelper);
+
+    //✏️Ejes
+    const axesHelper = new THREE.AxesHelper(50);
+    scene.add (axesHelper);
+  
+
+    // 🪄🪄 SECCIÓN DE CÓDIGO 🪄🪄
+
+    // Luz ambiental
+    const ambientLight = new THREE.AmbientLight(0x444444); // Luz ambiental suave
+    scene.add(ambientLight);
+    
+
+    // Luz direccional (simulando luz solar)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8); // Color y intensidad
+    directionalLight.position.set(10, 40, 10); // Posición de la luz
+    directionalLight.castShadow = true; // Habilitar sombras
+    scene.add(directionalLight);
+    
+     
+    // Cargar MTL
+    const mtlLoader = new MTLLoader();
+    mtlLoader.load('./assets/hun.mtl', (materials) => {
+        materials.preload(); // Pre-cargar materiales
+        const objLoader = new OBJLoader();
+        objLoader.setMaterials(materials);
+
+        // Cargar OBJ
+        objLoader.load('./assets/hun.obj', (object) => {
+        
+            object.rotation.x = 3/2* Math.PI;
+            object.rotation.z = Math.PI/ 4.7 ;
+            object.scale.set(0.2, 0.2, 0.2);
+            object.position.set(-2, 0, 25); // Colocar en la posición (0, 0, 0)
+            scene.add(object); // Añadir el objeto a la escena
+        }, undefined, (error) => {
+            console.error('Error al cargar el objeto:', error);
+        });
+    }, undefined, (error) => {
+        console.error('Error al cargar el MTL:', error);
+    });
+      
+
+      //🎰🎰Rendering y animación
+      requestAnimationFrame(render);
+      function render() {
+
+      //🪄🪄 Animación
+
+      controls.update();
+
+      //Llamado para renderizar y volver a llamar a la misma función (render)
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+      }
+</script>
+</body>
+</html>
